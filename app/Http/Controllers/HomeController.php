@@ -8,13 +8,20 @@ use App\Libraries\AstroPayStreamline;
 
 class HomeController extends Controller
 {
+    /**
+     * @param AstroPayStreamline $aps
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index(AstroPayStreamline $aps, Request $request)
     {
+        // init data
         $price = 1500;
         $status = '';
         $error = '';
 
         if ($request->input('full_name') && $request->input('email')) {
+            // payment data
             $invoice          = rand(1, 1000);
             $amount           = $price;
             $country          = 'BR';
@@ -33,9 +40,11 @@ class HomeController extends Controller
             $city             = '';
             $state            = '';
 
+            // create invoice
             $response = $aps->newinvoice($invoice, $amount, $bank, $country, $iduser, $cpf, $name, $email, $currency, $description, $bdate, $address, $zip, $city, $state, $return_url, $confirmation_url);
             $decoded_response = json_decode($response);
 
+            // redirect no error
             if ($decoded_response->status == 0) {
                 $url = $decoded_response->link;
                 header("Location: $url");
@@ -45,6 +54,7 @@ class HomeController extends Controller
             }
         }
 
+        // check invoice
         if ($request->input('x_amount')) {
             $status = $request->input('result');
             $check_amount = $request->input('x_amount');
